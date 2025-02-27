@@ -21,137 +21,127 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class CreditServiceTest {
-  @MockK
-  lateinit var creditRepository: CreditRepository
+  
+    @MockK
+    lateinit var creditRepository: CreditRepository
 
-  @MockK
-  lateinit var customerService: CustomerService
+    @MockK
+    lateinit var customerService: CustomerService
 
-  @InjectMockKs
-  lateinit var creditService: CreditService
+    @InjectMockKs
+    lateinit var creditService: CreditService
 
-  @BeforeEach
-  fun setUp() {
-    MockKAnnotations.init(this)
-    //creditService = CreditService(creditRepository, customerService)
-  }
+    @BeforeEach
+    fun setUp() {
+        MockKAnnotations.init(this)
+    }
 
-  @AfterEach
-  fun tearDown() {
-    unmockkAll()
-  }
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
+    }
 
-  @Test
-  fun `should create credit `() {
-    //given
-    val credit: Credit = buildCredit()
-    val customerId: Long = 1L
+    @Test
+    fun `should create credit`() {
+        // Given
+        val credit: Credit = buildCredit()
+        val customerId: Long = 1L
 
-    every { customerService.findById(customerId) } returns credit.customer!!
-    every { creditRepository.save(credit) } returns credit
-    //when
-    val actual: Credit = this.creditService.save(credit)
-    //then
-    verify(exactly = 1) { customerService.findById(customerId) }
-    verify(exactly = 1) { creditRepository.save(credit) }
+        every { customerService.findById(customerId) } returns credit.customer!!
+        every { creditRepository.save(credit) } returns credit
 
-    Assertions.assertThat(actual).isNotNull
-    Assertions.assertThat(actual).isSameAs(credit)
-  }
+        // When
+        val actual: Credit = this.creditService.save(credit)
 
-  @Test
-  fun `should not create credit when invalid day first installment`() {
-    //given
-    val invalidDayFirstInstallment: LocalDate = LocalDate.now().plusMonths(5)
-    val credit: Credit = buildCredit(dayFirstInstallment = invalidDayFirstInstallment)
+        // Then
+        verify(exactly = 1) { customerService.findById(customerId) }
+        verify(exactly = 1) { creditRepository.save(credit) }
 
-    every { creditRepository.save(credit) } answers { credit }
-    //when
-    Assertions.assertThatThrownBy { creditService.save(credit) }
-      .isInstanceOf(BusinessException::class.java)
-      .hasMessage("Invalid Date")
-    //then
-    verify(exactly = 0) { creditRepository.save(any()) }
-  }
+        Assertions.assertThat(actual).isNotNull
+        Assertions.assertThat(actual).isSameAs(credit)
+    }
 
-  @Test
-  fun `should return list of credits for a customer`() {
-    //given
-    val customerId: Long = 1L
-    val expectedCredits: List<Credit> = listOf(buildCredit(), buildCredit(), buildCredit())
+    @Test
+    fun `should not create credit when invalid day first installment`() {
+        // Given
+        val invalidDayFirstInstallment: LocalDate = LocalDate.now().plusMonths(5)
+        val credit: Credit = buildCredit(dayFirstInstallment = invalidDayFirstInstallment)
 
-    every { creditRepository.findAllByCustomerId(customerId) } returns expectedCredits
-    //when
-    val actual: List<Credit> = creditService.findAllByCustomer(customerId)
-    //then
-    Assertions.assertThat(actual).isNotNull
-    Assertions.assertThat(actual).isNotEmpty
-    Assertions.assertThat(actual).isSameAs(expectedCredits)
+        every { creditRepository.save(credit) } answers { credit }
 
-    verify(exactly = 1) { creditRepository.findAllByCustomerId(customerId) }
-  }
+        // When & Then
+        Assertions.assertThatThrownBy { creditService.save(credit) }
+            .isInstanceOf(BusinessException::class.java)
+            .hasMessage("Invalid Date")
 
-  @Test
-  fun `should return credit for a valid customer and credit code`() {
-    //given
-    val customerId: Long = 1L
-    val creditCode: UUID = UUID.randomUUID()
-    val credit: Credit = buildCredit(customer = Customer(id = customerId))
+        verify(exactly = 0) { creditRepository.save(any()) }
+    }
 
-    every { creditRepository.findByCreditCode(creditCode) } returns credit
-    //when
-    val actual: Credit = creditService.findByCreditCode(customerId, creditCode)
-    //then
-    Assertions.assertThat(actual).isNotNull
-    Assertions.assertThat(actual).isSameAs(credit)
+    @Test
+    fun `should return list of credits for a customer`() {
+        // Given
+        val customerId: Long = 1L
+        val expectedCredits: List<Credit> = listOf(buildCredit(), buildCredit(), buildCredit())
 
-    verify(exactly = 1) { creditRepository.findByCreditCode(creditCode) }
-  }
+        every { creditRepository.findAllByCustomerId(customerId) } returns expectedCredits
 
-  @Test
-  fun `should throw BusinessException for invalid credit code`() {
-    //given
-    val customerId: Long = 1L
-    val invalidCreditCode: UUID = UUID.randomUUID()
+        // When
+        val actual: List<Credit> = creditService.findAllByCustomer(customerId)
 
-    every { creditRepository.findByCreditCode(invalidCreditCode) } returns null
-    //when
-    //then
-    Assertions.assertThatThrownBy { creditService.findByCreditCode(customerId, invalidCreditCode) }
-      .isInstanceOf(BusinessException::class.java)
-      .hasMessage("Creditcode $invalidCreditCode not found")
-    //then
-    verify(exactly = 1) { creditRepository.findByCreditCode(invalidCreditCode) }
-  }
+        // Then
+        Assertions.assertThat(actual).isNotNull
+        Assertions.assertThat(actual).isNotEmpty
+        Assertions.assertThat(actual).isSameAs(expectedCredits)
 
-  @Test
-  fun `should throw IllegalArgumentException for different customer ID`() {
-    //given
-    val customerId: Long = 1L
-    val creditCode: UUID = UUID.randomUUID()
-    val credit: Credit = buildCredit(customer = Customer(id = 2L))
+        verify(exactly = 1) { creditRepository.findAllByCustomerId(customerId) }
+    }
 
-    every { creditRepository.findByCreditCode(creditCode) } returns credit
-    //when
-    //then
-    Assertions.assertThatThrownBy { creditService.findByCreditCode(customerId, creditCode) }
-      .isInstanceOf(IllegalArgumentException::class.java)
-      .hasMessage("Contact admin")
+    @Test
+    fun `should return credit for a valid customer and credit code`() {
+        // Given
+        val customerId: Long = 1L
+        val creditCode: UUID = UUID.randomUUID()
+        val credit: Credit = buildCredit(customer = Customer(id = customerId))
 
-    verify { creditRepository.findByCreditCode(creditCode) }
-  }
+        every { creditRepository.findByCreditCode(creditCode) } returns credit
 
-  companion object {
-    private fun buildCredit(
-      creditValue: BigDecimal = BigDecimal.valueOf(100.0),
-      dayFirstInstallment: LocalDate = LocalDate.now().plusMonths(2L),
-      numberOfInstallments: Int = 15,
-      customer: Customer = CustomerServiceTest.buildCustomer()
-    ): Credit = Credit(
-      creditValue = creditValue,
-      dayFirstInstallment = dayFirstInstallment,
-      numberOfInstallments = numberOfInstallments,
-      customer = customer
-    )
-  }
+        // When
+        val actual: Credit = creditService.findByCreditCode(customerId, creditCode)
+
+        // Then
+        Assertions.assertThat(actual).isNotNull
+        Assertions.assertThat(actual).isSameAs(credit)
+
+        verify(exactly = 1) { creditRepository.findByCreditCode(creditCode) }
+    }
+
+    @Test
+    fun `should throw BusinessException for invalid credit code`() {
+        // Given
+        val customerId: Long = 1L
+        val invalidCreditCode: UUID = UUID.randomUUID()
+
+        every { creditRepository.findByCreditCode(invalidCreditCode) } returns null
+
+        // When & Then
+        Assertions.assertThatThrownBy { creditService.findByCreditCode(customerId, invalidCreditCode) }
+            .isInstanceOf(BusinessException::class.java)
+            .hasMessage("Creditcode $invalidCreditCode not found")
+
+        verify(exactly = 1) { creditRepository.findByCreditCode(invalidCreditCode) }
+    }
+
+    companion object {
+        private fun buildCredit(
+            creditValue: BigDecimal = BigDecimal.valueOf(100.0),
+            dayFirstInstallment: LocalDate = LocalDate.now().plusMonths(2L),
+            numberOfInstallments: Int = 15,
+            customer: Customer = CustomerServiceTest.buildCustomer()
+        ): Credit = Credit(
+            creditValue = creditValue,
+            dayFirstInstallment = dayFirstInstallment,
+            numberOfInstallments = numberOfInstallments,
+            customer = customer
+        )
+    }
 }

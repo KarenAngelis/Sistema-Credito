@@ -57,9 +57,38 @@ Este repositório foi criado para fins de estudo, então contribua com ele.<br>
 Se te ajudei de alguma forma, ficarei feliz em saber. Caso você conheça alguém que se identifique com o conteúdo, não
 deixe de compatilhar.
 
-Se possível:
 
-⭐️ Star o projeto
+🔍 Possíveis Erros e Soluções
+Se os testes falharem, aqui estão algumas possíveis causas e como corrigi-las:
 
-🐛 Encontrar e relatar issues
+Erro	
+mvn: command not found	
+Solução: Verifique se o Maven foi instalado corretamente e reinicie o terminal.
+
+Erro	
+Tests failed	
+Solução: Verifique a mensagem de erro específica, pode ser um problema no código ou no banco de dados.
+
+Erro	
+No tests were found	
+Solução: Confirme que os arquivos de teste estão dentro de src/test/kotlin/.
+
+Erro	
+ClassNotFoundException	
+Solução: O teste pode estar chamando uma classe que não foi importada corretamente.
+
+🎯 Resultado Esperado
+Se tudo estiver correto, ao rodar mvn test, você verá uma saída semelhante a esta:
+
+bash
+
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running me.dio.credit.application.system.service.CreditServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.34 sec
+[INFO] -------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] Total time: 5.123s
+Isso significa que todos os testes passaram com sucesso! ✅🎉
 
